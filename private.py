@@ -10,6 +10,10 @@ def start(update, context):
     if update.effective_chat.type == "private":
         msg = format_msg(f'''
                 Hello Human! I am *CAH* v{version} !!!
+                
+                Feel free to create feature or issue requests on
+                *github.com/ApfelPresse/CardsAgainstHumanityTelegramBot*
+
                 You can create a game with /create and other humans can join with /join !
             ''')
         user_id = update.effective_user.id
