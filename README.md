@@ -13,8 +13,8 @@ Create a API Token with the Telegram BotFather, then
     
 # Thanks to
     
-    Telegram Python API
-    https://github.com/python-telegram-bot/python-telegram-bot
+Telegram Python API
+https://github.com/python-telegram-bot/python-telegram-bot
     
-    Cards Against Humanity as plain text and JSON
-    https://www.crhallberg.com/cah/    
+Cards Against Humanity as plain text and JSON
+https://www.crhallberg.com/cah/
