@@ -1,3 +1,5 @@
+import random
+
 from main import send_choice_to_czar, get_current_black_card, send_cards_choice_to_user, czar_round, \
     create_cards_choice_czar_dict, game_loop, send_message_to_players
 from stats import *
@@ -7,7 +9,7 @@ from util import is_user_czar, format_msg
 def start(update, context):
     if update.effective_chat.type == "private":
         msg = format_msg(f'''
-                Hello Human! I am *CAH* v.{version} !!!
+                Hello Human! I am *CAH* v{version} !!!
                 You can create a game with /create and other humans can join with /join !
             ''')
         user_id = update.effective_user.id
@@ -83,7 +85,7 @@ def callback(update, context):
             if czar_round(game_id):
                 czar_possible_choices = create_cards_choice_czar_dict(game_id)
                 msg = "All players have chosen their cards!\n"
-                for c in list(czar_possible_choices.values()):
+                for c in random.shuffle(list(czar_possible_choices.values())):
                     msg += c + "\n"
                 send_message_to_players(update, context, game_id, msg)
                 send_choice_to_czar(update, context, game_id)

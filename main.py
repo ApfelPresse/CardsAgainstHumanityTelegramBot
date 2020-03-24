@@ -83,6 +83,14 @@ def join(update, context):
         context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
 
     current_game = games[update.effective_chat.id]
+
+    if user_id in current_game["users"]:
+        msg = format_msg(f'''
+            You've already joined the game
+        ''')
+        context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
+        return
+
     current_game["users"].append(user_id)
     current_game["cards"][user_id] = []
     current_game["scores"][user_id] = 0
@@ -273,7 +281,7 @@ def create_cards_choice_czar_dict(game_id):
 
 def create_cards_choice_czar(game_id):
     button_list = create_cards_choice_czar_dict(game_id)
-    return list(button_list.values())
+    return random.shuffle(list(button_list.values()))
 
 
 def send_choice_to_czar(update, context, game_id):
@@ -345,7 +353,7 @@ def destroy(update, context):
         return
     game_id = update.effective_chat.id
     if game_id in games:
-        games[game_id] = {}
+        games.pop(game_id, None)
         msg = format_msg(f'''
                     thx
         ''')
@@ -359,18 +367,42 @@ def destroy(update, context):
 
 # ['Base', 'CAHe1', 'CAHe2', 'CAHe3', 'CAHe4', 'CAHe5', 'CAHe6', 'greenbox', '90s', 'Box', 'fantasy', 'food', 'science', 'www', 'hillary', 'trumpvote', 'trumpbag', 'xmas2012', 'xmas2013', 'PAXE2013', 'PAXP2013', 'PAXE2014', 'PAXEP2014', 'PAXPP2014', 'PAX2015', 'HOCAH', 'reject', 'reject2', 'Canadian', 'misprint', 'apples', 'crabs', 'matrimony', 'c-tg', 'c-admin', 'c-anime', 'c-antisocial', 'c-equinity', 'c-homestuck', 'c-derps', 'c-doctorwho', 'c-eurovision', 'c-fim', 'c-gamegrumps', 'c-golby', 'GOT', 'CAHgrognards', 'HACK', 'Image1', 'c-ladies', 'c-imgur', 'c-khaos', 'c-mrman', 'c-neindy', 'c-nobilis', 'NSFH', 'c-northernlion', 'c-ragingpsyfag', 'c-stupid', 'c-rt', 'c-rpanons', 'c-socialgamer', 'c-sodomydog', 'c-guywglasses', 'c-vewysewious', 'c-vidya', 'c-xkcd', 'order']
 
-def who_is_playing(update, context):
+def status(update, context):
     game_id = update.effective_chat.id
     if update.effective_chat.type == "private":
         msg = format_msg(f'''
-                You are alone!
+                Only in Groups!
         ''')
         context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
         return
 
-    msg = format_msg(f'''
-            You are alone!
-    ''')
+    if game_id not in games:
+        msg = format_msg(f'''
+                    There is no game!
+                ''')
+        context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
+        return
+
+    current_game = games[game_id]
+    msg = f"*Status* \n\n"
+
+    czar_rou = czar_round(game_id)
+    if czar_rou:
+        msg += "Czar has to chose a Card! \n"
+    else:
+        msg += "Players has to chose their cards! \n"
+
+    how_many_cards_to_choose = get_current_black_card(game_id)["pick"]
+    for user_id in current_game['users']:
+        name = user_ids[user_id]["info"]["first_name"]
+        czar = is_user_czar(game_id, user_id)
+        how_many_cards_did_player_choose = len(current_game["card_choice"][user_id])
+        is_choosing = how_many_cards_did_player_choose < how_many_cards_to_choose
+        if czar:
+            msg += f"{name} is card czar! \n"
+        else:
+            msg += f"{name}, is_choosing={is_choosing} \n"
+
     context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
 
 
@@ -392,7 +424,7 @@ def main():
     dispatcher.add_handler(start_handler)
     start_handler = CommandHandler('destroy', destroy)
     dispatcher.add_handler(start_handler)
-    start_handler = CommandHandler('whoIsPlaying', who_is_playing)
+    start_handler = CommandHandler('status', status)
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(MessageHandler(Filters.text, callback))
 
