@@ -7,7 +7,7 @@ Create a API Token with the Telegram BotFather, then
     conda create -n cah python=3.6
     conda activate cah
     pip install -r requirements.txt
-    >> change API TOKEN in "api_token" file
+    >> change API TOKEN in "api_token" file (create the file if it does not exist)
     python main.py
     
     
