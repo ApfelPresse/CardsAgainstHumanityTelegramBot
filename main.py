@@ -278,8 +278,8 @@ def create_cards_choice_czar_dict(game_id):
 
 
 def create_cards_choice_czar(game_id):
-    button_list = list(create_cards_choice_czar_dict(game_id))
-    random.shuffle(button_list.values())
+    button_list = list(create_cards_choice_czar_dict(game_id).values())
+    random.shuffle(button_list)
     return button_list
 
 def send_choice_to_czar(update, context, game_id):
