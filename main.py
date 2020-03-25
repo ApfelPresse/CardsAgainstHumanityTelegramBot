@@ -1,5 +1,5 @@
 from emoji import emojize
-from telegram.ext import CommandHandler, Updater, MessageHandler, Filters
+from telegram.ext import Updater, MessageHandler, Filters, CommandHandler
 
 from private import *
 from util import *
@@ -282,6 +282,7 @@ def create_cards_choice_czar(game_id):
     random.shuffle(button_list)
     return button_list
 
+
 def send_choice_to_czar(update, context, game_id):
     current_game = games[game_id]
     czar_id = current_game["czar"]
@@ -363,8 +364,6 @@ def destroy(update, context):
         context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
 
 
-# ['Base', 'CAHe1', 'CAHe2', 'CAHe3', 'CAHe4', 'CAHe5', 'CAHe6', 'greenbox', '90s', 'Box', 'fantasy', 'food', 'science', 'www', 'hillary', 'trumpvote', 'trumpbag', 'xmas2012', 'xmas2013', 'PAXE2013', 'PAXP2013', 'PAXE2014', 'PAXEP2014', 'PAXPP2014', 'PAX2015', 'HOCAH', 'reject', 'reject2', 'Canadian', 'misprint', 'apples', 'crabs', 'matrimony', 'c-tg', 'c-admin', 'c-anime', 'c-antisocial', 'c-equinity', 'c-homestuck', 'c-derps', 'c-doctorwho', 'c-eurovision', 'c-fim', 'c-gamegrumps', 'c-golby', 'GOT', 'CAHgrognards', 'HACK', 'Image1', 'c-ladies', 'c-imgur', 'c-khaos', 'c-mrman', 'c-neindy', 'c-nobilis', 'NSFH', 'c-northernlion', 'c-ragingpsyfag', 'c-stupid', 'c-rt', 'c-rpanons', 'c-socialgamer', 'c-sodomydog', 'c-guywglasses', 'c-vewysewious', 'c-vidya', 'c-xkcd', 'order']
-
 def status(update, context):
     game_id = update.effective_chat.id
     if update.effective_chat.type == "private":
@@ -404,28 +403,59 @@ def status(update, context):
     context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
 
 
-def main():
+def load_api_token():
+    """
+    :return: Telegram API Token from BotFather
+    """
     with open('api_token', 'r') as file:
         api_token = file.read()
-        updater = Updater(token=api_token, use_context=True)
-        print(api_token)
-    dispatcher = updater.dispatcher
-    start_handler = CommandHandler('create', create)
-    dispatcher.add_handler(start_handler)
-    start_handler = CommandHandler('join', join)
-    dispatcher.add_handler(start_handler)
-    start_handler = CommandHandler('start', start)
-    dispatcher.add_handler(start_handler)
-    start_handler = CommandHandler('begin', begin)
-    dispatcher.add_handler(start_handler)
-    start_handler = CommandHandler('leave', leave)
-    dispatcher.add_handler(start_handler)
-    start_handler = CommandHandler('destroy', destroy)
-    dispatcher.add_handler(start_handler)
-    start_handler = CommandHandler('status', status)
-    dispatcher.add_handler(start_handler)
-    dispatcher.add_handler(MessageHandler(Filters.text, callback))
+        return api_token
 
+
+def main():
+    api_token = load_api_token()
+    updater = Updater(token=api_token, use_context=True)
+    dispatcher = updater.dispatcher
+
+    commands = {
+        "create": {
+            "method": create,
+            "short_desc": "Creates a new game!",
+            "long_desc": "Creates a new game in a Group!"
+        },
+        "join": {
+            "method": join,
+            "short_desc": "",
+            "long_desc": ""
+        },
+        "start": {
+            "method": start,
+            "short_desc": "",
+            "long_desc": ""
+        },
+        "begin": {
+            "method": begin,
+            "short_desc": "",
+            "long_desc": ""
+        },
+        "leave": {
+            "method": leave,
+            "short_desc": "",
+            "long_desc": ""
+        },
+        "destroy": {
+            "method": destroy,
+            "short_desc": "",
+            "long_desc": ""
+        },
+        "status": {
+            "method": status,
+            "short_desc": "",
+            "long_desc": ""
+        }
+    }
+    [dispatcher.add_handler(CommandHandler(command, commands[command]["method"])) for command in commands]
+    dispatcher.add_handler(MessageHandler(Filters.text, callback))
     updater.start_polling()
 
 
