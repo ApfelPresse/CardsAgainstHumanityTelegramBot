@@ -4,6 +4,9 @@ from telegram.ext import CommandHandler, Updater, MessageHandler, Filters
 from private import *
 from util import *
 
+# testtesttest
+#ANOTHER TEST
+
 
 def choose_random_black_card(game_id):
     current_game = games[game_id]
