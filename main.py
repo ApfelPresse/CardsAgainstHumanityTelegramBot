@@ -38,7 +38,9 @@ def create(update, context):
     except:
         pass
 
-    msg = "Thanks for creating a new game! Other Humans should write me a private messsage /start and can than join the game with /join !"
+    msg = format_msg(f'''Thanks for creating a new game! \n
+     Other Humans can **write me a private message** /start\n
+     and then join the game here with /join ! \n ''')
     game_id = update.effective_chat.id
     games[game_id] = {
         "users": [],
@@ -110,7 +112,7 @@ def fill_players_white_cards(game_id):
 def begin(update, context):
     if update.effective_chat.type == "private":
         msg = "Forever Alone? Or you want to play with yourself? No? \n" \
-              "Just add me o a group and then create a game!"
+              "Just add me to a group and then create a game!"
         context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
         return
 
@@ -385,9 +387,9 @@ def status(update, context):
 
     czar_rou = czar_round(game_id)
     if czar_rou:
-        msg += "Czar has to choose a Card! \n"
+        msg += "The czar has to choose a card! \n\n"
     else:
-        msg += "Players have to chose their cards! \n"
+        msg += "Some players are still choosing! \n\n"
 
     how_many_cards_to_choose = get_current_black_card(game_id)["pick"]
     for user_id in current_game['users']:
@@ -398,14 +400,18 @@ def status(update, context):
         if czar:
             msg += f"{name} is card czar! \n"
         else:
-            msg += f"{name}, is_choosing={is_choosing} \n"
+            if is_choosing:
+                msg += f"{name}, is choosing \n"
+            else:
+                msg += f"{name}, has chosen \n"
 
     context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
 
 
 def main():
     with open('api_token', 'r') as file:
-        api_token = file.read()
+        api_token = file.read().replace("\n","")
+        print(api_token)
         updater = Updater(token=api_token, use_context=True)
         print(api_token)
     dispatcher = updater.dispatcher
