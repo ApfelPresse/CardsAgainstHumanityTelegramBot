@@ -4,10 +4,6 @@ from telegram.ext import CommandHandler, Updater, MessageHandler, Filters
 from private import *
 from util import *
 
-# testtesttest
-#ANOTHER TEST
-
-
 def choose_random_black_card(game_id):
     current_game = games[game_id]
 
@@ -42,7 +38,7 @@ def create(update, context):
     except:
         pass
 
-    msg = "Thanks for creating a new game! Other Humans should join with /join !"
+    msg = "Thanks for creating a new game! Other Humans should write me a private messsage /start and can than join the game with /join !"
     game_id = update.effective_chat.id
     games[game_id] = {
         "users": [],
