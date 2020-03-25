@@ -18,7 +18,11 @@ def choose_random_black_card(game_id):
 
 def create_game(update, context, game_id):
     if game_id not in games:
-        msg = "Thanks for creating a new game! Other Humans should join with /join !"
+        msg = format_msg(f'''
+        Thanks for creating a new game!
+        Other Humans can write me a **private message** /start
+
+        and then join the game here with /join !''')
         games[game_id] = {
             "users": [],
             "czar": 0,
