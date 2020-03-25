@@ -17,43 +17,21 @@ def choose_random_black_card(game_id):
     return card
 
 
-def create(update, context):
-    if update.effective_chat.type == "private":
-        msg = "Forever Alone? Or you want to play with yourself? No? \n" \
-              "Just add me o a group and then create a game!"
-        context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
-        return
-
-    if update.effective_chat.id in games:
-        msg = "Human!! A game has already been created.. Just Join the Game!"
-        context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
-        return
-
-    settings = {}
-    try:
-        for arg in context.args:
-            split = arg.split("=")
-            key = split[0]
-            value = split[1]
-            settings[key] = value
-    except:
-        pass
-
-    msg = "Thanks for creating a new game! Other Humans should join with /join !"
-    game_id = update.effective_chat.id
-    games[game_id] = {
-        "users": [],
-        "czar": 0,
-        "game_stats": game_stats_default.copy(),
-        "cards": {},
-        "black_card": 0,
-        "scores": {},
-        "card_choice": {}
-    }
-
-    games[game_id]["game_stats"].update(settings)
-
-    context.bot.send_message(parse_mode='Markdown', chat_id=game_id, text=msg)
+def create_game(update, context, game_id):
+    if game_id not in games:
+        msg = "Thanks for creating a new game! Other Humans should join with /join !"
+        games[game_id] = {
+            "users": [],
+            "czar": 0,
+            "min_players": 2,
+            "game_started": False,
+            "game_stats": game_stats_default.copy(),
+            "cards": {},
+            "black_card": 0,
+            "scores": {},
+            "card_choice": {}
+        }
+        context.bot.send_message(parse_mode='Markdown', chat_id=game_id, text=msg)
 
 
 def join(update, context):
@@ -73,12 +51,8 @@ def join(update, context):
         context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
         return
 
-    if update.effective_chat.id not in games:
-        unamused = emojize(":unamused:", use_aliases=True)
-        msg = f"Ohh Human {unamused} \n" \
-              "First you have to **/create** a game, then you can join one! \n" \
-              "Sounds simple?"
-        context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
+    game_id = update.effective_chat.id
+    create_game(update, context, game_id)
 
     current_game = games[update.effective_chat.id]
 
@@ -98,8 +72,18 @@ def join(update, context):
     msg = f"Human {update.effective_user.first_name} joined the game!! Yeaaaah {grin}!!"
     context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
 
+    diff_players = current_game["min_players"] - len(current_game["users"])
+    if not current_game["game_started"]:
+        if diff_players <= 0:
+            current_game["game_started"] = True
+            context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text="Game started!")
+            next_player(update, context)
+        else:
+            context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id,
+                                     text=f"{diff_players} player(s) is/are missing!")
 
-def fill_players_white_cards(game_id):
+
+def fill_white_cards(game_id):
     current_game = games[game_id]
     max_cards = 10
     deck = "Base"
@@ -108,7 +92,7 @@ def fill_players_white_cards(game_id):
         current_game["cards"][user] += cards
 
 
-def begin(update, context):
+def next_player(update, context):
     if update.effective_chat.type == "private":
         msg = "Forever Alone? Or you want to play with yourself? No? \n" \
               "Just add me o a group and then create a game!"
@@ -195,7 +179,7 @@ def game_loop(update, context, game_id):
     if game_over(context, game_id, update):
         reset_game(game_id)
 
-    fill_players_white_cards(game_id)
+    fill_white_cards(game_id)
     current_game["black_card"] = choose_random_black_card(game_id)
 
     notify_card_czar(update, context, game_id)
@@ -418,11 +402,6 @@ def main():
     dispatcher = updater.dispatcher
 
     commands = {
-        "create": {
-            "method": create,
-            "short_desc": "Creates a new game!",
-            "long_desc": "Creates a new game in a Group!"
-        },
         "join": {
             "method": join,
             "short_desc": "",
@@ -433,8 +412,8 @@ def main():
             "short_desc": "",
             "long_desc": ""
         },
-        "begin": {
-            "method": begin,
+        "next": {
+            "method": next_player,
             "short_desc": "",
             "long_desc": ""
         },
