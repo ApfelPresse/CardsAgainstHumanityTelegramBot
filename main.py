@@ -76,11 +76,28 @@ def join(update, context):
     if not current_game["game_started"]:
         if diff_players <= 0:
             current_game["game_started"] = True
-            context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text="Game started!")
+            context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id,
+                                     text="Yeah, the game is starting. Please move to the private chat and play from there.")
             next_player(update, context)
         else:
             context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id,
                                      text=f"{diff_players} player(s) is/are missing!")
+    else:
+        """
+        use
+        msg = format_msg(f'''
+            I dont know you! Human!
+            First send me a private message (/start)
+        ''')
+        """
+
+        # group message
+        context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id,
+                                 text=f"Game started, please wait until next round")
+
+        # private message
+        context.bot.send_message(parse_mode='Markdown', chat_id=player_to_private_chat_id[user_id],
+                                 text=f"Game started, please wait until next round")
 
 
 def fill_white_cards(game_id):
@@ -392,7 +409,7 @@ def load_api_token():
     :return: Telegram API Token from BotFather
     """
     with open('api_token', 'r') as file:
-        api_token = file.read()
+        api_token = file.read().replace("\n", "")
         return api_token
 
 
