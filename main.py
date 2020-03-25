@@ -1,5 +1,5 @@
 from emoji import emojize
-from telegram.ext import CommandHandler, Updater, MessageHandler, Filters
+from telegram.ext import Updater, MessageHandler, Filters, CommandHandler
 
 from private import *
 from util import *
@@ -16,45 +16,21 @@ def choose_random_black_card(game_id):
     return card
 
 
-def create(update, context):
-    if update.effective_chat.type == "private":
-        msg = "Forever Alone? Or you want to play with yourself? No? \n" \
-              "Just add me o a group and then create a game!"
-        context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
-        return
-
-    if update.effective_chat.id in games:
-        msg = "Human!! A game has already been created.. Just Join the Game!"
-        context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
-        return
-
-    settings = {}
-    try:
-        for arg in context.args:
-            split = arg.split("=")
-            key = split[0]
-            value = split[1]
-            settings[key] = value
-    except:
-        pass
-
-    msg = format_msg(f'''Thanks for creating a new game! \n
-     Other Humans can **write me a private message** /start\n
-     and then join the game here with /join ! \n ''')
-    game_id = update.effective_chat.id
-    games[game_id] = {
-        "users": [],
-        "czar": 0,
-        "game_stats": game_stats_default.copy(),
-        "cards": {},
-        "black_card": 0,
-        "scores": {},
-        "card_choice": {}
-    }
-
-    games[game_id]["game_stats"].update(settings)
-
-    context.bot.send_message(parse_mode='Markdown', chat_id=game_id, text=msg)
+def create_game(update, context, game_id):
+    if game_id not in games:
+        msg = "Thanks for creating a new game! Other Humans should join with /join !"
+        games[game_id] = {
+            "users": [],
+            "czar": 0,
+            "min_players": 2,
+            "game_started": False,
+            "game_stats": game_stats_default.copy(),
+            "cards": {},
+            "black_card": 0,
+            "scores": {},
+            "card_choice": {}
+        }
+        context.bot.send_message(parse_mode='Markdown', chat_id=game_id, text=msg)
 
 
 def join(update, context):
@@ -74,12 +50,8 @@ def join(update, context):
         context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
         return
 
-    if update.effective_chat.id not in games:
-        unamused = emojize(":unamused:", use_aliases=True)
-        msg = f"Ohh Human {unamused} \n" \
-              "First you have to **/create** a game, then you can join one! \n" \
-              "Sounds simple?"
-        context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
+    game_id = update.effective_chat.id
+    create_game(update, context, game_id)
 
     current_game = games[update.effective_chat.id]
 
@@ -99,8 +71,35 @@ def join(update, context):
     msg = f"Human {update.effective_user.first_name} joined the game!! Yeaaaah {grin}!!"
     context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
 
+    diff_players = current_game["min_players"] - len(current_game["users"])
+    if not current_game["game_started"]:
+        if diff_players <= 0:
+            current_game["game_started"] = True
+            context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id,
+                                     text="Yeah, the game is starting. Please move to the private chat and play from there.")
+            next_player(update, context)
+        else:
+            context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id,
+                                     text=f"{diff_players} player(s) is/are missing!")
+    else:
+        """
+        use
+        msg = format_msg(f'''
+            I dont know you! Human!
+            First send me a private message (/start)
+        ''')
+        """
 
-def fill_players_white_cards(game_id):
+        # group message
+        context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id,
+                                 text=f"Game started, please wait until next round")
+
+        # private message
+        context.bot.send_message(parse_mode='Markdown', chat_id=player_to_private_chat_id[user_id],
+                                 text=f"Game started, please wait until next round")
+
+
+def fill_white_cards(game_id):
     current_game = games[game_id]
     max_cards = 10
     deck = "Base"
@@ -109,7 +108,7 @@ def fill_players_white_cards(game_id):
         current_game["cards"][user] += cards
 
 
-def begin(update, context):
+def next_player(update, context):
     if update.effective_chat.type == "private":
         msg = "Forever Alone? Or you want to play with yourself? No? \n" \
               "Just add me to a group and then create a game!"
@@ -196,7 +195,7 @@ def game_loop(update, context, game_id):
     if game_over(context, game_id, update):
         reset_game(game_id)
 
-    fill_players_white_cards(game_id)
+    fill_white_cards(game_id)
     current_game["black_card"] = choose_random_black_card(game_id)
 
     notify_card_czar(update, context, game_id)
@@ -283,6 +282,7 @@ def create_cards_choice_czar(game_id):
     random.shuffle(button_list)
     return button_list
 
+
 def send_choice_to_czar(update, context, game_id):
     current_game = games[game_id]
     czar_id = current_game["czar"]
@@ -364,8 +364,6 @@ def destroy(update, context):
         context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
 
 
-# ['Base', 'CAHe1', 'CAHe2', 'CAHe3', 'CAHe4', 'CAHe5', 'CAHe6', 'greenbox', '90s', 'Box', 'fantasy', 'food', 'science', 'www', 'hillary', 'trumpvote', 'trumpbag', 'xmas2012', 'xmas2013', 'PAXE2013', 'PAXP2013', 'PAXE2014', 'PAXEP2014', 'PAXPP2014', 'PAX2015', 'HOCAH', 'reject', 'reject2', 'Canadian', 'misprint', 'apples', 'crabs', 'matrimony', 'c-tg', 'c-admin', 'c-anime', 'c-antisocial', 'c-equinity', 'c-homestuck', 'c-derps', 'c-doctorwho', 'c-eurovision', 'c-fim', 'c-gamegrumps', 'c-golby', 'GOT', 'CAHgrognards', 'HACK', 'Image1', 'c-ladies', 'c-imgur', 'c-khaos', 'c-mrman', 'c-neindy', 'c-nobilis', 'NSFH', 'c-northernlion', 'c-ragingpsyfag', 'c-stupid', 'c-rt', 'c-rpanons', 'c-socialgamer', 'c-sodomydog', 'c-guywglasses', 'c-vewysewious', 'c-vidya', 'c-xkcd', 'order']
-
 def status(update, context):
     game_id = update.effective_chat.id
     if update.effective_chat.type == "private":
@@ -408,29 +406,54 @@ def status(update, context):
     context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
 
 
-def main():
+def load_api_token():
+    """
+    :return: Telegram API Token from BotFather
+    """
     with open('api_token', 'r') as file:
-        api_token = file.read().replace("\n","")
-        print(api_token)
-        updater = Updater(token=api_token, use_context=True)
-        print(api_token)
-    dispatcher = updater.dispatcher
-    start_handler = CommandHandler('create', create)
-    dispatcher.add_handler(start_handler)
-    start_handler = CommandHandler('join', join)
-    dispatcher.add_handler(start_handler)
-    start_handler = CommandHandler('start', start)
-    dispatcher.add_handler(start_handler)
-    start_handler = CommandHandler('begin', begin)
-    dispatcher.add_handler(start_handler)
-    start_handler = CommandHandler('leave', leave)
-    dispatcher.add_handler(start_handler)
-    start_handler = CommandHandler('destroy', destroy)
-    dispatcher.add_handler(start_handler)
-    start_handler = CommandHandler('status', status)
-    dispatcher.add_handler(start_handler)
-    dispatcher.add_handler(MessageHandler(Filters.text, callback))
+        api_token = file.read().replace("\n", "")
+        return api_token
 
+
+def main():
+    api_token = load_api_token()
+    updater = Updater(token=api_token, use_context=True)
+    dispatcher = updater.dispatcher
+
+    commands = {
+        "join": {
+            "method": join,
+            "short_desc": "",
+            "long_desc": ""
+        },
+        "start": {
+            "method": start,
+            "short_desc": "",
+            "long_desc": ""
+        },
+        "next": {
+            "method": next_player,
+            "short_desc": "",
+            "long_desc": ""
+        },
+        "leave": {
+            "method": leave,
+            "short_desc": "",
+            "long_desc": ""
+        },
+        "destroy": {
+            "method": destroy,
+            "short_desc": "",
+            "long_desc": ""
+        },
+        "status": {
+            "method": status,
+            "short_desc": "",
+            "long_desc": ""
+        }
+    }
+    [dispatcher.add_handler(CommandHandler(command, commands[command]["method"])) for command in commands]
+    dispatcher.add_handler(MessageHandler(Filters.text, callback))
     updater.start_polling()
 
 

@@ -1,6 +1,10 @@
 import json
 
+# TODO ugly
+
 version = 0.5
+
+commands = {}
 
 decks = {}
 with open('deck.json') as jsonfile:
