@@ -278,9 +278,9 @@ def create_cards_choice_czar_dict(game_id):
 
 
 def create_cards_choice_czar(game_id):
-    button_list = create_cards_choice_czar_dict(game_id)
-    return random.shuffle(list(button_list.values()))
-
+    button_list = list(create_cards_choice_czar_dict(game_id))
+    random.shuffle(button_list.values())
+    return button_list
 
 def send_choice_to_czar(update, context, game_id):
     current_game = games[game_id]
@@ -386,9 +386,9 @@ def status(update, context):
 
     czar_rou = czar_round(game_id)
     if czar_rou:
-        msg += "Czar has to chose a Card! \n"
+        msg += "Czar has to choose a Card! \n"
     else:
-        msg += "Players has to chose their cards! \n"
+        msg += "Players have to chose their cards! \n"
 
     how_many_cards_to_choose = get_current_black_card(game_id)["pick"]
     for user_id in current_game['users']:

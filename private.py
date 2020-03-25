@@ -89,7 +89,9 @@ def callback(update, context):
             if czar_round(game_id):
                 czar_possible_choices = create_cards_choice_czar_dict(game_id)
                 msg = "All players have chosen their cards!\n"
-                for c in random.shuffle(list(czar_possible_choices.values())):
+                choices = list(czar_possible_choices.values())
+                random.shuffle(choices)
+                for c in choices:
                     msg += c + "\n"
                 send_message_to_players(update, context, game_id, msg)
                 send_choice_to_czar(update, context, game_id)
