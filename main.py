@@ -1,5 +1,3 @@
-import random
-
 from emoji import emojize
 from telegram.ext import CommandHandler, Updater, MessageHandler, Filters
 

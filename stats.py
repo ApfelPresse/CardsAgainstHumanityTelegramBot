@@ -1,6 +1,6 @@
 import json
 
-version = 0.4
+version = 0.5
 
 decks = {}
 with open('deck.json') as jsonfile:
