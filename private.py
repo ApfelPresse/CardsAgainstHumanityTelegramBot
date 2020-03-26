@@ -82,6 +82,7 @@ def callback(update, context):
 
                 msg = format_msg(f"""
                     All players have chosen their cards!
+                    
                     <i>The Czar may now choose:</i>
                     """)
                 choices = list(czar_possible_choices.values())
