@@ -292,12 +292,13 @@ def get_current_black_card(game_id):
     return decks["blackCards"][black_card_id]
 
 
-def send_message_to_players(update, context, game_id, msg):
+def send_message_to_players(update, context, game_id, msg, czar=True):
     current_game = games[game_id]
     for user in current_game["users"]:
         try:
-            chat_id = player_to_private_chat_id[user]
-            context.bot.send_message(parse_mode='html', chat_id=chat_id, text=msg)
+            if is_user_czar(game_id, user) and czar:
+                chat_id = player_to_private_chat_id[user]
+                context.bot.send_message(parse_mode='html', chat_id=chat_id, text=msg)
         except:
             pass
 
