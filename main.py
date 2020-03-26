@@ -1,6 +1,6 @@
 import logging
 import os
-
+import time
 from telegram.ext import Updater, MessageHandler, Filters, CommandHandler
 
 from private import *
@@ -39,6 +39,7 @@ def create_game(update, context, game_id):
             "users": [],
             "czar": 0,
             "game_started": False,
+            "add_user_next_round": [],
             "game_stats": game_stats_default.copy(),
             "cards": {},
             "black_card": 0,
@@ -99,14 +100,7 @@ def join(update, context):
         else:
             send_waiting_for_players(update, context, game_id, diff_players)
     else:
-        """
-        use
-        msg = format_msg(f'''
-            I dont know you! Human!
-            First send me a private message (/start)
-        ''')
-        """
-
+        current_game["add_user_next_round"].push(user_id)
         # group message
         context.bot.send_message(parse_mode='html', chat_id=update.effective_chat.id,
                                  text=f"Welcome to the game! Game started, please wait until next round.")
@@ -231,7 +225,7 @@ def game_loop(update, context, game_id):
         current_game["game_started"] = False
         send_waiting_for_players(update, context, game_id, diff_players)
         return
-
+    current_game["add_user_next_round"] = []
     remove_chosen_cards(game_id)
     it_czar(game_id)
 
@@ -281,7 +275,8 @@ def send_cards_choice_to_all_players(update, context, game_id):
 def czar_round(game_id):
     current_game = games[game_id]
     how_many_cards_to_choose = get_current_black_card(game_id)["pick"]
-    how_many_players = len(current_game["card_choice"].values()) - 1
+    new_joined_players = len(current_game["add_user_next_round"])
+    how_many_players = len(current_game["card_choice"].values()) - 1 - new_joined_players
     how_many_choose_at_the_moment = len(sum(current_game["card_choice"].values(), []))
     return how_many_choose_at_the_moment == (how_many_players * how_many_cards_to_choose)
 
