@@ -289,7 +289,7 @@ def send_message_to_players(update, context, game_id, msg):
     for user in current_game["users"]:
         try:
             chat_id = player_to_private_chat_id[user]
-            context.bot.send_message(parse_mode='Markdown', chat_id=chat_id, text=msg)
+            context.bot.send_message(parse_mode='html', chat_id=chat_id, text=msg)
         except:
             pass
 
@@ -348,7 +348,7 @@ def send_cards_choice_to_user(update, context, game_id, user_id):
 
     elif pick == 3:
         msg += format_msg(f"""
-        <i>Pick {:three:} <b>{pick} Cards</b></i>!
+        <i>Pick {three} <b>{pick} Cards</b></i>!
         """)
 
     else :
