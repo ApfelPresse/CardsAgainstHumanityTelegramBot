@@ -4,17 +4,35 @@ from main import send_choice_to_czar, get_current_black_card, send_cards_choice_
     create_cards_choice_czar_dict, game_loop, send_message_to_players
 from stats import *
 from util import is_user_czar, format_msg
+from emoji import emojize
+
+point_right = emojize(":point_right:", use_aliases=True)
+grin = emojize(":grin:", use_aliases=True)
+wave = emojize(":wave:", use_aliases=True)
+drum = emojize(":drum:", use_aliases=True)
+glass = "\U0001f942"
+
 
 
 def start(update, context):
+
+
     if update.effective_chat.type == "private":
         msg = format_msg(f'''
-                Hello Human! I am *CAH* v{version} !!!
+                Hello Human! I am the
+
+                *Cards Against Humanity Bot*
+                v{version}!!
 
                 Feel free to create feature or issue requests on
                 *github.com/ApfelPresse/CardsAgainstHumanityTelegramBot*
             ''')
-        msg2 = format_msg(f'''Go back to the group now and join a game with /join or create one with /create!''')
+        msg2 = format_msg(f'''{point_right} *Go back to the group now* and
+        join a game with /join {glass} or
+        create a new game with /create {drum} !''')
+
+        print(msg2)
+
         user_id = update.effective_user.id
         if user_id not in user_ids:
             user_ids[user_id] = {
@@ -24,6 +42,7 @@ def start(update, context):
             send_return_back_to_game[user_id] = []
         context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
         context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg2)
+
         return
 
     msg = format_msg(f'''

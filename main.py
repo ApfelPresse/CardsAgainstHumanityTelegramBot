@@ -4,6 +4,22 @@ from telegram.ext import Updater, MessageHandler, Filters, CommandHandler
 from private import *
 from util import *
 
+eyes = emojize(":eyes:", use_aliases=True)
+point_right = emojize(":point_right:", use_aliases=True)
+point_left = emojize(":point_left:", use_aliases=True)
+grin = emojize(":grin:", use_aliases=True)
+wave = emojize(":wave:", use_aliases=True)
+drum = emojize(":drum:", use_aliases=True)
+violin = emojize(":violin:", use_aliases=True)
+handshake = emojize(":handshake:", use_aliases=True)
+location = emojize(":location:", use_aliases=True)
+hourglass = emojize(":hourglass:", use_aliases=True)
+
+
+crescmoon = "\U0001f318"
+dice = "\U0001f3b2"
+glass = "\U0001f942"
+
 def choose_random_black_card(game_id):
     current_game = games[game_id]
 
@@ -19,10 +35,13 @@ def choose_random_black_card(game_id):
 def create_game(update, context, game_id):
     if game_id not in games:
         msg = format_msg(f'''
-        Thanks for creating a new game!
-        Other Humans can write me a **private message** /start
+        Thanks for creating a new game! {crescmoon}
 
-        and then join the game here with /join !''')
+        Other Humans can
+
+        {handshake} send me a **private message** with /start
+
+        {glass} and then join here with /join !''')
         games[game_id] = {
             "users": [],
             "czar": 0,
@@ -38,6 +57,9 @@ def create_game(update, context, game_id):
 
 
 def join(update, context):
+    msg_gamestart = format_msg(f'''Enough humans. The game is starting. {point_left}
+    Hurry on *back to the private chat* to pick your cards and play {violin} {dice}.''')
+
     user_id = update.effective_user.id
 
     if update.effective_chat.type == "private":
@@ -72,6 +94,7 @@ def join(update, context):
     current_game["card_choice"][user_id] = []
 
     grin = emojize(":grin:", use_aliases=True)
+
     msg = f"Human {update.effective_user.first_name} joined the game!! Yeaaaah {grin}!!"
     context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
 
@@ -80,11 +103,16 @@ def join(update, context):
         if diff_players <= 0:
             current_game["game_started"] = True
             context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id,
-                                     text="Yeah, the game is starting. Please move to the private chat and play from there.")
+                                     text=msg_gamestart)
             next_player(update, context)
         else:
-            context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id,
-                                     text=f"{diff_players} player(s) is/are missing!")
+
+            if diff_players == 1:
+                context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id,
+                                         text=f"{hourglass} {diff_players} player is missing! ")
+            else:
+                context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id,
+                                     text=f"{hourglass} {diff_players} players are missing!")
     else:
         """
         use
@@ -96,7 +124,7 @@ def join(update, context):
 
         # group message
         context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id,
-                                 text=f"Game started, please wait until next round")
+                                 text=f"Welcome to the game! Game started, please wait until next round")
 
         # private message
         context.bot.send_message(parse_mode='Markdown', chat_id=player_to_private_chat_id[user_id],
