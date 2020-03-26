@@ -1,3 +1,5 @@
+import os
+
 from emoji import emojize
 from telegram.ext import Updater, MessageHandler, Filters, CommandHandler
 
@@ -408,13 +410,18 @@ def load_api_token():
     """
     :return: Telegram API Token from BotFather
     """
-    with open('api_token', 'r') as file:
-        api_token = file.read().replace("\n", "")
-        return api_token
+    filename = 'api_token'
+    if os.path.isfile(filename):
+        with open('api_token', 'r') as file:
+            api_token = file.read().replace("\n", "")
+            return api_token
+    return ""
 
 
 def main():
     api_token = load_api_token()
+    if not api_token:
+        api_token = os.environ['API_TOKEN']
     updater = Updater(token=api_token, use_context=True)
     dispatcher = updater.dispatcher
 
