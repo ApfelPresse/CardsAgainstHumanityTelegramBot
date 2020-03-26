@@ -255,7 +255,7 @@ def game_over(context, game_id, update):
 
         if score >= max_score:
             msg = format_msg(f'''
-                {tada}{tada}{tada}<br>ROUND FINISHED</br>{tada}{tada}{tada}
+                {tada}{tada}{tada}<b>ROUND FINISHED</b>{tada}{tada}{tada}
                 {trophy} {name} wins the round!{tada}
                 Score {score}
             ''')
@@ -292,13 +292,10 @@ def get_current_black_card(game_id):
 def send_message_to_players(update, context, game_id, msg, czar=True):
     current_game = games[game_id]
     for user in current_game["users"]:
-        try:
-            if not czar and is_user_czar(game_id, user):
-                continue
-            chat_id = player_to_private_chat_id[user]
-            context.bot.send_message(parse_mode='html', chat_id=chat_id, text=msg)
-        except:
-            pass
+        if not czar and is_user_czar(game_id, user):
+            continue
+        chat_id = player_to_private_chat_id[user]
+        context.bot.send_message(parse_mode='html', chat_id=chat_id, text=msg)
 
 
 def create_cards_choice_czar_dict(game_id):
