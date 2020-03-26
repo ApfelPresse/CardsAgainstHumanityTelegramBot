@@ -12,15 +12,17 @@ logger.setLevel(logging.INFO)
 
 
 def choose_random_black_card(game_id):
-    current_game = games[game_id]
-
-    try:
-        deck = random.choice(current_game["game_stats"]["deck_keys"].split(","))
-    except:
-        deck = random.choice(game_stats_default["deck_keys"].split(","))
-
+    deck = get_random_deck(game_id)
     card = random.choice(decks[deck]["black"])
     return card
+
+
+def get_random_deck(game_id):
+    current_game = games[game_id]
+    try:
+        return random.choice(current_game["game_stats"]["deck_keys"].split(","))
+    except:
+        return random.choice(game_stats_default["deck_keys"].split(","))
 
 
 def create_game(update, context, game_id):
@@ -125,8 +127,8 @@ def send_waiting_for_players(update, context, game_id, diff_players):
 
 def fill_white_cards(game_id):
     current_game = games[game_id]
-    max_cards = 10
-    deck = "Base"
+    max_cards = current_game["game_stats"]["max_cards"]
+    deck = get_random_deck(game_id)
     for user in current_game["users"]:
         cards = random.sample(decks[deck]["white"], max_cards - len(current_game["cards"][user]))
         current_game["cards"][user] += cards
