@@ -1,6 +1,7 @@
 import logging
 import os
 import time
+
 from telegram.ext import Updater, MessageHandler, Filters, CommandHandler
 
 from private import *
@@ -187,6 +188,7 @@ def send_score_to_players(update, context, game_id):
         name = user_ids[user_id]["info"]["first_name"]
 
         msg += f"{name} - <b>{score}</b> \n"
+    time.sleep(1)
     send_message_to_players(update, context, game_id, msg)
 
 
@@ -237,8 +239,6 @@ def game_loop(update, context, game_id):
     current_game["black_card"] = choose_random_black_card(game_id)
 
     notify_card_czar(update, context, game_id)
-    # send_black_card(update, context, game_id)
-
     send_cards_choice_to_all_players(update, context, game_id)
 
 
@@ -256,9 +256,13 @@ def game_over(context, game_id, update):
         if score >= max_score:
             msg = format_msg(f'''
                 {tada}{tada}{tada}<b>ROUND FINISHED</b>{tada}{tada}{tada}
+<<<<<<< HEAD
 
                 {trophy} <b>{name} wins the round! </b>{trophy}
 
+=======
+                {trophy} {name} wins the round!{tada}
+>>>>>>> c93d8d8357269182a6fea2aaea232ef96b53fc50
                 Score {score}
             ''')
             print(msg)
@@ -294,13 +298,10 @@ def get_current_black_card(game_id):
 def send_message_to_players(update, context, game_id, msg, czar=True):
     current_game = games[game_id]
     for user in current_game["users"]:
-        try:
-            if not czar and is_user_czar(game_id, user):
-                continue
-            chat_id = player_to_private_chat_id[user]
-            context.bot.send_message(parse_mode='html', chat_id=chat_id, text=msg)
-        except:
-            pass
+        if not czar and is_user_czar(game_id, user):
+            continue
+        chat_id = player_to_private_chat_id[user]
+        context.bot.send_message(parse_mode='html', chat_id=chat_id, text=msg)
 
 
 def create_cards_choice_czar_dict(game_id):
@@ -384,7 +385,6 @@ def get_czar(game_id):
     current_game = games[game_id]
     czar = user_ids[current_game["users"][current_game["czar"]]]["info"]["first_name"]
     return czar
-
 
 
 @send_action(ChatAction.TYPING)
