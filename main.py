@@ -259,6 +259,7 @@ def game_over(context, game_id, update):
                 {trophy} {name} wins the round!{tada}
                 Score {score}
             ''')
+            print(msg)
             send_message_to_players(update, context, game_id, msg)
             return True
     return False
@@ -362,10 +363,10 @@ def send_cards_choice_to_user(update, context, game_id, user_id):
         <i>Pick <b>{pick} Cards</b></i>!
         """)
 
-    czar = get_czar()
+    czar = get_czar(game_id)
 
     msg += format_msg(f"""
-    <i>{czar}is Card Czar</i>!
+    {czar} is Card Czar.
     """)
 
     print(msg)
@@ -377,7 +378,8 @@ def send_cards_choice_to_user(update, context, game_id, user_id):
     send_choice(update, context, player_to_private_chat_id[user_id], msg, button_list)
 
 
-def get_czar():
+def get_czar(game_id):
+    current_game = games[game_id]
     czar = user_ids[current_game["users"][current_game["czar"]]]["info"]["first_name"]
     return czar
 
