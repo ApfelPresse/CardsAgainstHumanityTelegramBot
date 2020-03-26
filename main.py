@@ -366,8 +366,6 @@ def send_cards_choice_to_user(update, context, game_id, user_id):
         <i>Pick <b>{pick} Cards</b></i>!
         """)
 
-    print(msg)
-
     # to know which choice belongs to which game
     # ist a ugly solution
     send_return_back_to_game[user_id].insert(0, game_id)
