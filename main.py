@@ -5,8 +5,6 @@ from telegram.ext import Updater, MessageHandler, Filters, CommandHandler
 
 from private import *
 from util import *
-from emojis import *
-
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger()
@@ -185,10 +183,10 @@ def remove_chosen_cards(game_id):
 
 
 def send_score_to_players(update, context, game_id):
-    """msg = format_msg(f'''
+    msg = format_msg(f'''
         <b>Scores</b>
 
-        ''')"""
+        ''')
     current_game = games[game_id]
     for user_id in current_game["users"]:
         score = current_game["scores"][user_id]
@@ -230,6 +228,7 @@ def game_loop(update, context, game_id):
 
     diff_players = how_many_players_missing(game_id)
     if diff_players > 0:
+        current_game["game_started"] = False
         send_waiting_for_players(update, context, game_id, diff_players)
         return
 
@@ -297,9 +296,10 @@ def send_message_to_players(update, context, game_id, msg, czar=True):
     current_game = games[game_id]
     for user in current_game["users"]:
         try:
-            if is_user_czar(game_id, user) and czar:
-                chat_id = player_to_private_chat_id[user]
-                context.bot.send_message(parse_mode='html', chat_id=chat_id, text=msg)
+            if not czar and is_user_czar(game_id, user):
+                continue
+            chat_id = player_to_private_chat_id[user]
+            context.bot.send_message(parse_mode='html', chat_id=chat_id, text=msg)
         except:
             pass
 
@@ -327,7 +327,7 @@ def send_choice_to_czar(update, context, game_id, title):
     user_id = current_game["users"][czar_id]
 
     black_card_id = current_game["black_card"]
-    #title = decks["blackCards"][black_card_id]["text"]
+    # title = decks["blackCards"][black_card_id]["text"]
 
     send_return_back_to_game[user_id].insert(0, game_id)
 
@@ -361,7 +361,7 @@ def send_cards_choice_to_user(update, context, game_id, user_id):
         <i>Pick {three} <b>{pick} Cards</b></i>!
         """)
 
-    else :
+    else:
         msg += format_msg(f"""
         <i>Pick <b>{pick} Cards</b></i>!
         """)
