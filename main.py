@@ -6,6 +6,8 @@ from telegram.ext import Updater, MessageHandler, Filters, CommandHandler
 from private import *
 from util import *
 
+#Test
+
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
