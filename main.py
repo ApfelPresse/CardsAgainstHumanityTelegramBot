@@ -3,7 +3,6 @@ import os
 
 from telegram.ext import Updater, MessageHandler, Filters, CommandHandler
 
-from emojis import *
 from private import *
 from util import *
 
@@ -47,6 +46,7 @@ def create_game(update, context, game_id):
         context.bot.send_message(parse_mode='Markdown', chat_id=game_id, text=msg)
 
 
+@send_action(ChatAction.TYPING)
 def join(update, context):
     msg_gamestart = format_msg(f'''Enough humans. The game is starting. {point_left}
     Hurry on *back to the private chat* to pick your cards and play {violin} {dice}.''')
@@ -132,6 +132,7 @@ def fill_white_cards(game_id):
         current_game["cards"][user] += cards
 
 
+@send_action(ChatAction.TYPING)
 def next_player(update, context):
     if update.effective_chat.type == "private":
         msg = "Forever Alone? Or you want to play with yourself? No? \n" \
@@ -372,6 +373,7 @@ def send_cards_choice_to_user(update, context, game_id, user_id):
 '''
 
 
+@send_action(ChatAction.TYPING)
 def leave(update, context):
     game_id = update.effective_chat.id
     if update.effective_chat.type == "private":

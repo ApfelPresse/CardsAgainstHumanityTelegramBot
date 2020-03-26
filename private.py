@@ -1,12 +1,15 @@
 import random
 
+from telegram import ChatAction
+
 from emojis import *
 from main import send_choice_to_czar, get_current_black_card, send_cards_choice_to_user, czar_round, \
     create_cards_choice_czar_dict, game_loop, send_message_to_players
 from stats import *
-from util import is_user_czar, format_msg
+from util import is_user_czar, format_msg, send_action
 
 
+@send_action(ChatAction.TYPING)
 def start(update, context):
     if update.effective_chat.type == "private":
         msg = format_msg(f'''
