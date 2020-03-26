@@ -67,24 +67,7 @@ def callback(update, context):
             choice = update["message"]["text"]
 
             if is_user_czar(game_id, user_id) and czar_round(game_id):
-                user_id_choice = get_user_id_from_choice(game_id, choice)
-                if user_id_choice == -1:
-                    send_choice_to_czar(update, context, game_id)
-                    return
-                current_game = games[game_id]
-                current_game["scores"][user_id_choice] += 1
-                player_name_score = user_ids[user_id_choice]["info"]["first_name"]
-
-                back_card_text = get_current_black_card(game_id)['text']
-                msg = format_msg(f'''
-                        Czar chose..
-                        *{back_card_text}*
-                        {choice}
-
-                        Player {player_name_score} gets a point!
-                ''')
-                send_message_to_players(update, context, game_id, msg)
-                game_loop(update, context, game_id)
+                handle_czar_choice(choice, context, game_id, update)
                 return
 
             card_choice = check_if_choose_was_correct(game_id, user_id, choice)
@@ -108,3 +91,24 @@ def callback(update, context):
                 how_many_cards_did_player_choose = len(current_game["card_choice"][user_id])
                 if how_many_cards_did_player_choose < how_many_cards_to_choose:
                     send_cards_choice_to_user(update, context, game_id, user_id)
+
+
+def handle_czar_choice(choice, context, game_id, update):
+    user_id_choice = get_user_id_from_choice(game_id, choice)
+    if user_id_choice == -1:
+        send_choice_to_czar(update, context, game_id)
+        return
+    current_game = games[game_id]
+    current_game["scores"][user_id_choice] += 1
+    player_name_score = user_ids[user_id_choice]["info"]["first_name"]
+    back_card_text = get_current_black_card(game_id)['text']
+    msg = format_msg(f'''
+                        Czar chose..
+                        *{back_card_text}*
+                        {choice}
+
+                        Player {player_name_score} gets a point!
+                ''')
+    send_message_to_players(update, context, game_id, msg)
+    game_loop(update, context, game_id)
+    return
