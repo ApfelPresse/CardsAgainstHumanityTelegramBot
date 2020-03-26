@@ -1,6 +1,7 @@
 import logging
 import os
 import time
+
 from telegram.ext import Updater, MessageHandler, Filters, CommandHandler
 
 from private import *
@@ -187,6 +188,7 @@ def send_score_to_players(update, context, game_id):
         name = user_ids[user_id]["info"]["first_name"]
 
         msg += f"{name} - <b>{score}</b> \n"
+    time.sleep(1)
     send_message_to_players(update, context, game_id, msg)
 
 
@@ -237,8 +239,6 @@ def game_loop(update, context, game_id):
     current_game["black_card"] = choose_random_black_card(game_id)
 
     notify_card_czar(update, context, game_id)
-    # send_black_card(update, context, game_id)
-
     send_cards_choice_to_all_players(update, context, game_id)
 
 
@@ -380,7 +380,6 @@ def send_cards_choice_to_user(update, context, game_id, user_id):
 def get_czar():
     czar = user_ids[current_game["users"][current_game["czar"]]]["info"]["first_name"]
     return czar
-
 
 
 @send_action(ChatAction.TYPING)
