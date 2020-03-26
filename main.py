@@ -255,8 +255,10 @@ def game_over(context, game_id, update):
 
         if score >= max_score:
             msg = format_msg(f'''
-                {tada}{tada}{tada}<br>ROUND FINISHED</br>{tada}{tada}{tada}
-                {trophy} {name} wins the round!{tada}
+                {tada}{tada}{tada}<b>ROUND FINISHED</b>{tada}{tada}{tada}
+
+                {trophy} <b>{name} wins the round! </b>{trophy}
+
                 Score {score}
             ''')
             print(msg)
