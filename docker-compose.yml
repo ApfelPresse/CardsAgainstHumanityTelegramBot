@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+
+  CAH_Bot:
+    image: "cah_telegram:latest"
+    environment:
+      API_TOKEN: "INSERT_YOUR_TELEGRAM_BOT_API_TOKEN"

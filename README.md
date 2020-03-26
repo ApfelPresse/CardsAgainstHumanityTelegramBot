@@ -26,6 +26,10 @@ Cards Against Humanity (Clone) Telegram Bot v0.5
 
     docker build -t cah_telegram:latest .
     
+# *wip Docker Compose
+    
+    >> change api token in docker-compose.yml 
+    docker-compose up
 
 # Thanks to
     
