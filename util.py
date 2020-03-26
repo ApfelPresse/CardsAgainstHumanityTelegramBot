@@ -1,21 +1,8 @@
 import re
-from functools import wraps
 
 from telegram import ReplyKeyboardMarkup
 
 from stats import *
-
-
-def send_action(action):
-    def decorator(func):
-        @wraps(func)
-        def command_func(update, context, *args, **kwargs):
-            context.bot.send_chat_action(chat_id=update.effective_message.chat_id, action=action)
-            return func(update, context, *args, **kwargs)
-
-        return command_func
-
-    return decorator
 
 
 def build_menu(buttons, n_cols, header_buttons=None, footer_buttons=None):
@@ -30,11 +17,6 @@ def build_menu(buttons, n_cols, header_buttons=None, footer_buttons=None):
 def send_choice(update, context, chat_id, title, choices):
     reply_markup = ReplyKeyboardMarkup(build_menu(choices, n_cols=1), one_time_keyboard=True)
     context.bot.send_message(parse_mode='html', chat_id=chat_id, text=title, reply_markup=reply_markup)
-
-
-def send_choice_czar(update, context, chat_id, title, choices):
-    reply_markup = ReplyKeyboardMarkup(build_menu(choices, n_cols=1), one_time_keyboard=True)
-    context.bot.send_message(parse_mode='html', chat_id=chat_id, reply_markup=reply_markup)
 
 
 def is_user_czar(game_id, user_id):
