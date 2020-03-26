@@ -262,7 +262,8 @@ def game_over(context, game_id, update):
 
         if score >= max_score:
             msg = format_msg(f'''
-                Player {name} wins the game!
+                {tada}{tada}{tada}<br>ROUND FINISHED</br>{tada}{tada}{tada}
+                {trophy} {name} wins the round!{tada}
                 Score {score}
             ''')
             send_message_to_players(update, context, game_id, msg)
@@ -365,6 +366,12 @@ def send_cards_choice_to_user(update, context, game_id, user_id):
         <i>Pick <b>{pick} Cards</b></i>!
         """)
 
+    czar = get_czar()
+
+    msg += format_msg(f"""
+    <i>{czar}is Card Czar</i>!
+    """)
+
     print(msg)
 
     # to know which choice belongs to which game
@@ -372,6 +379,12 @@ def send_cards_choice_to_user(update, context, game_id, user_id):
     send_return_back_to_game[user_id].insert(0, game_id)
 
     send_choice(update, context, player_to_private_chat_id[user_id], msg, button_list)
+
+
+def get_czar():
+    czar = user_ids[current_game["users"][current_game["czar"]]]["info"]["first_name"]
+    return czar
+
 
 
 @send_action(ChatAction.TYPING)
@@ -458,7 +471,7 @@ def status(update, context):
 
     czar_rou = czar_round(game_id)
     if czar_rou:
-        msg += "The czar has to choose a card! \n\n"
+        msg += "The Czar has to choose a card! \n\n"
     else:
         msg += "Some players are still choosing! \n\n"
 
@@ -472,9 +485,9 @@ def status(update, context):
             msg += f"{name} is {crown} card czar! \n"
         else:
             if is_choosing:
-                msg += f"{name}, is choosing \n"
+                msg += f"{name} is choosing \n"
             else:
-                msg += f"{name}, has chosen \n"
+                msg += f"{name} has chosen \n"
 
     context.bot.send_message(parse_mode='html', chat_id=update.effective_chat.id, text=msg)
 

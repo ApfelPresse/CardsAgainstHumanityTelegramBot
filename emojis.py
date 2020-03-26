@@ -14,6 +14,10 @@ crown = emojize(":crown:", use_aliases=True)
 star = emojize(":star:", use_aliases=True)
 twofingers = emojize(":v:", use_aliases=True)
 three = emojize(":three:", use_aliases=True)
+trophy = emojize(":trophy:", use_aliases=True)
+tada = emojize(":tada:", use_aliases=True)
+
+
 
 
 
