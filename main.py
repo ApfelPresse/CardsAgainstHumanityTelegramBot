@@ -5,8 +5,8 @@ from telegram.ext import Updater, MessageHandler, Filters, CommandHandler
 
 from private import *
 from util import *
+from emojis import *
 
-#Test
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger()
@@ -197,10 +197,12 @@ def notify_card_czar(update, context, game_id):
     user_id = current_game["users"][czar_id]
     black_card_text = get_current_black_card(game_id)["text"]
     msg = format_msg(f'''
-        You are the card czar, please wait for other players!
-        *{black_card_text}*
+        {crown} You are the card czar.
+        <i>Please wait for other players!</i>
+
+        <b>{black_card_text}</b>
     ''')
-    context.bot.send_message(parse_mode='Markdown', chat_id=player_to_private_chat_id[user_id], text=msg)
+    context.bot.send_message(parse_mode='html', chat_id=player_to_private_chat_id[user_id], text=msg)
 
 
 def reset_game(game_id):
@@ -279,14 +281,6 @@ def get_current_black_card(game_id):
     return decks["blackCards"][black_card_id]
 
 
-def send_black_card(update, context, game_id):
-    current_black = get_current_black_card(game_id)
-    pick = current_black["pick"]
-    msg = "*" + current_black["text"] + "*\n"
-    msg += f"Pick {pick} Card(s)!"
-    context.bot.send_message(parse_mode='Markdown', chat_id=game_id, text=msg)
-
-
 def send_message_to_players(update, context, game_id, msg):
     current_game = games[game_id]
     for user in current_game["users"]:
@@ -335,13 +329,47 @@ def send_cards_choice_to_user(update, context, game_id, user_id):
                    card not in current_game["card_choice"][user_id]]
     black_card = get_current_black_card(game_id)
     pick = black_card["pick"]
-    title = black_card["text"] + f" Pick {pick} !"
+    cardtext = black_card["text"]
+
+    msg = format_msg(f"""
+        <b>{cardtext}</b>
+        """)
+    if pick == 1:
+        msg += format_msg(f"""
+        <i>Pick your Card</i>!
+        """)
+    else :
+        msg += format_msg(f"""
+        <i>Pick <b>{pick} Cards</b></i>!
+        """)
+
+    print(msg)
 
     # to know which choice belongs to which game
     # ist a ugly solution
     send_return_back_to_game[user_id].insert(0, game_id)
 
-    send_choice(update, context, player_to_private_chat_id[user_id], title, button_list)
+    send_choice(update, context, player_to_private_chat_id[user_id], msg, button_list)
+
+
+    #context.bot.send_message(parse_mode='Markdown', chat_id=game_id, text=msg)
+
+
+''''
+    current_black = get_current_black_card(game_id)
+    pick = current_black["pick"]
+    cardtext = current_black["text"]
+    msg = format_msg(f"""
+        *{cardtext}*
+        """)
+    if pick == 1:
+        msg += format_msg(f"""\n*Pick your Card*!""")
+    else :
+        msg += format_msg(f"""\n*Pick {pick} Cards*!""")
+
+'''
+
+
 
 
 def leave(update, context):
@@ -438,7 +466,7 @@ def status(update, context):
         how_many_cards_did_player_choose = len(current_game["card_choice"][user_id])
         is_choosing = how_many_cards_did_player_choose < how_many_cards_to_choose
         if czar:
-            msg += f"{name} is card czar! \n"
+            msg += f"{name} is {crown} card czar! \n"
         else:
             if is_choosing:
                 msg += f"{name}, is choosing \n"
