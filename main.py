@@ -182,12 +182,15 @@ def remove_chosen_cards(game_id):
 
 
 def send_score_to_players(update, context, game_id):
-    msg = "Scores \n"
+    msg = format_msg(f'''
+        *Scores:*
+
+        ''')
     current_game = games[game_id]
     for user_id in current_game["users"]:
         score = current_game["scores"][user_id]
         name = user_ids[user_id]["info"]["first_name"]
-        msg += f"{name} - Score {score} \n"
+        msg += f"{name} - Score *{score}* \n"
     send_message_to_players(update, context, game_id, msg)
 
 
@@ -338,6 +341,16 @@ def send_cards_choice_to_user(update, context, game_id, user_id):
         msg += format_msg(f"""
         <i>Pick your Card</i>!
         """)
+    elif pick == 2:
+        msg += format_msg(f"""
+        <i>Pick {twofingers} <b>{pick} Cards</b></i>!
+        """)
+
+    elif pick == 3:
+        msg += format_msg(f"""
+        <i>Pick {:three:} <b>{pick} Cards</b></i>!
+        """)
+
     else :
         msg += format_msg(f"""
         <i>Pick <b>{pick} Cards</b></i>!
@@ -353,22 +366,6 @@ def send_cards_choice_to_user(update, context, game_id, user_id):
 
 
     #context.bot.send_message(parse_mode='Markdown', chat_id=game_id, text=msg)
-
-
-''''
-    current_black = get_current_black_card(game_id)
-    pick = current_black["pick"]
-    cardtext = current_black["text"]
-    msg = format_msg(f"""
-        *{cardtext}*
-        """)
-    if pick == 1:
-        msg += format_msg(f"""\n*Pick your Card*!""")
-    else :
-        msg += format_msg(f"""\n*Pick {pick} Cards*!""")
-
-'''
-
 
 
 

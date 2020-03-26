@@ -11,6 +11,10 @@ handshake = emojize(":handshake:", use_aliases=True)
 location = emojize(":location:", use_aliases=True)
 hourglass = emojize(":hourglass:", use_aliases=True)
 crown = emojize(":crown:", use_aliases=True)
+star = emojize(":star:", use_aliases=True)
+twofingers = emojize(":v:", use_aliases=True)
+
+
 
 glass = "\U0001f942"
 

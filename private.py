@@ -79,11 +79,16 @@ def callback(update, context):
 
             if czar_round(game_id):
                 czar_possible_choices = create_cards_choice_czar_dict(game_id)
-                msg = "All players have chosen their cards!\n"
+
+                msg+= format_msg(f"""
+                    All players have chosen their cards!
+                    <i>The card czar may now choose between:</i>
+                    """)
                 choices = list(czar_possible_choices.values())
                 random.shuffle(choices)
                 for c in choices:
-                    msg += c + "\n"
+                    msg += c + "\n\n"
+
                 send_message_to_players(update, context, game_id, msg)
                 send_choice_to_czar(update, context, game_id)
             else:
@@ -103,11 +108,12 @@ def handle_czar_choice(choice, context, game_id, update):
     player_name_score = user_ids[user_id_choice]["info"]["first_name"]
     back_card_text = get_current_black_card(game_id)['text']
     msg = format_msg(f'''
-                        Czar chose..
+                        The czar chose!
                         *{back_card_text}*
-                        {choice}
 
-                        Player {player_name_score} gets a point!
+                        {point_right}{choice}
+
+                        Player *{player_name_score}* gets a point {choice} !
                 ''')
     send_message_to_players(update, context, game_id, msg)
     game_loop(update, context, game_id)
