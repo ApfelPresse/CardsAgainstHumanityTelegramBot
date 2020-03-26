@@ -22,8 +22,6 @@ def start(update, context):
         join a game with /join {glass} or
         create a new game with /create {drum} !''')
 
-        print(msg2)
-
         user_id = update.effective_user.id
         if user_id not in user_ids:
             user_ids[user_id] = {
