@@ -182,15 +182,16 @@ def remove_chosen_cards(game_id):
 
 
 def send_score_to_players(update, context, game_id):
-    msg = format_msg(f'''
-        <b>Scores:</b>
+    """msg = format_msg(f'''
+        <b>Scores</b>
 
-        ''')
+        ''')"""
     current_game = games[game_id]
     for user_id in current_game["users"]:
         score = current_game["scores"][user_id]
         name = user_ids[user_id]["info"]["first_name"]
-        msg += f"{name} - Score <b>{score}</b> \n"
+
+        msg += f"{name} - <b>{score}</b> \n"
     send_message_to_players(update, context, game_id, msg)
 
 
