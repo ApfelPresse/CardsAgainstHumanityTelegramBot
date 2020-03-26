@@ -15,13 +15,13 @@ def start(update, context):
         msg = format_msg(f'''
                 Hello Human! I am the
 
-                *Cards Against Humanity Bot*
+                <b>Cards Against Humanity Bot</b>
                 v{version}!!
 
                 Feel free to create feature or issue requests on
-                *github.com/ApfelPresse/CardsAgainstHumanityTelegramBot*
+                <b>github.com/ApfelPresse/CardsAgainstHumanityTelegramBot</b>
             ''')
-        msg2 = format_msg(f'''{point_right} *Go back to the group now* and
+        msg2 = format_msg(f'''{point_right} <b>Go back to the group now</b> and
         join a game with /join {glass} or
         create a new game with /create {drum} !''')
 
@@ -32,15 +32,15 @@ def start(update, context):
             }
             player_to_private_chat_id[user_id] = update.effective_chat.id
             send_return_back_to_game[user_id] = []
-        context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
-        context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg2)
+        context.bot.send_message(parse_mode='html', chat_id=update.effective_chat.id, text=msg)
+        context.bot.send_message(parse_mode='html', chat_id=update.effective_chat.id, text=msg2)
 
         return
 
     msg = format_msg(f'''
-        Send me a *private* message! (/start), please...
+        Send me a <b>private</b> message! (/start), please...
     ''')
-    context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
+    context.bot.send_message(parse_mode='html', chat_id=update.effective_chat.id, text=msg)
 
 
 def check_if_choose_was_correct(game_id, user_id, choose):
@@ -82,13 +82,18 @@ def callback(update, context):
 
             if czar_round(game_id):
                 czar_possible_choices = create_cards_choice_czar_dict(game_id)
-                msg = "All players have chosen their cards!\n"
+
+                msg = format_msg(f"""
+                    All players have chosen their cards!
+                    <i>The Czar may now choose:</i>
+                    """)
                 choices = list(czar_possible_choices.values())
                 random.shuffle(choices)
                 for c in choices:
                     msg += c + "\n"
+
                 send_message_to_players(update, context, game_id, msg)
-                send_choice_to_czar(update, context, game_id)
+                send_choice_to_czar(update, context, game_id, msg)
             else:
                 how_many_cards_to_choose = get_current_black_card(game_id)["pick"]
                 how_many_cards_did_player_choose = len(current_game["card_choice"][user_id])
@@ -106,11 +111,12 @@ def handle_czar_choice(choice, context, game_id, update):
     player_name_score = user_ids[user_id_choice]["info"]["first_name"]
     back_card_text = get_current_black_card(game_id)['text']
     msg = format_msg(f'''
-                        Czar chose..
-                        *{back_card_text}*
-                        {choice}
+                        The Czar chose!
+                        <b>{back_card_text}</b>
 
-                        Player {player_name_score} gets a point!
+                        {point_right} {choice}
+
+                        Player <b>{player_name_score}</b> gets a point!
                 ''')
     send_message_to_players(update, context, game_id, msg)
     game_loop(update, context, game_id)

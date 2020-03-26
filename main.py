@@ -5,6 +5,8 @@ from telegram.ext import Updater, MessageHandler, Filters, CommandHandler
 
 from private import *
 from util import *
+from emojis import *
+
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger()
@@ -32,7 +34,7 @@ def create_game(update, context, game_id):
 
         Other Humans can
 
-        {handshake} send me a **private message** with /start
+        {handshake} send me a <b>private message</b> with /start
 
         {glass} and then join here with /join !''')
         games[game_id] = {
@@ -45,20 +47,20 @@ def create_game(update, context, game_id):
             "scores": {},
             "card_choice": {}
         }
-        context.bot.send_message(parse_mode='Markdown', chat_id=game_id, text=msg)
+        context.bot.send_message(parse_mode='html', chat_id=game_id, text=msg)
 
 
 @send_action(ChatAction.TYPING)
 def join(update, context):
     msg_gamestart = format_msg(f'''Enough humans. The game is starting. {point_left}
-    Hurry on *back to the private chat* to pick your cards and play {violin} {dice}.''')
+    Hurry on <b>back to the private chat</b> to pick your cards and play {violin} {dice}.''')
 
     user_id = update.effective_user.id
 
     if update.effective_chat.type == "private":
         msg = "Forever Alone? Or you want to play with yourself? No? \n" \
               "Just add me o a group and then create a game!"
-        context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
+        context.bot.send_message(parse_mode='html', chat_id=update.effective_chat.id, text=msg)
         return
 
     if user_id not in user_ids:
@@ -66,7 +68,7 @@ def join(update, context):
             I dont know you! Human!
             First send me a private message (/start)
         ''')
-        context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
+        context.bot.send_message(parse_mode='html', chat_id=update.effective_chat.id, text=msg)
         return
 
     game_id = update.effective_chat.id
@@ -78,7 +80,7 @@ def join(update, context):
         msg = format_msg(f'''
             You've already joined the game
         ''')
-        context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
+        context.bot.send_message(parse_mode='html', chat_id=update.effective_chat.id, text=msg)
         return
 
     current_game["users"].append(user_id)
@@ -87,13 +89,13 @@ def join(update, context):
     current_game["card_choice"][user_id] = []
 
     msg = f"Human {update.effective_user.first_name} joined the game!! Yeaaaah {grin}!!"
-    context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
+    context.bot.send_message(parse_mode='html', chat_id=update.effective_chat.id, text=msg)
 
     diff_players = how_many_players_missing(game_id)
     if not current_game["game_started"]:
         if diff_players <= 0:
             current_game["game_started"] = True
-            context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id,
+            context.bot.send_message(parse_mode='html', chat_id=update.effective_chat.id,
                                      text=msg_gamestart)
             next_player(update, context)
         else:
@@ -108,20 +110,20 @@ def join(update, context):
         """
 
         # group message
-        context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id,
-                                 text=f"Welcome to the game! Game started, please wait until next round")
+        context.bot.send_message(parse_mode='html', chat_id=update.effective_chat.id,
+                                 text=f"Welcome to the game! Game started, please wait until next round.")
 
         # private message
-        context.bot.send_message(parse_mode='Markdown', chat_id=player_to_private_chat_id[user_id],
+        context.bot.send_message(parse_mode='html', chat_id=player_to_private_chat_id[user_id],
                                  text=f"Game started, please wait until next round")
 
 
 def send_waiting_for_players(update, context, game_id, diff_players):
     if diff_players == 1:
-        context.bot.send_message(parse_mode='Markdown', chat_id=game_id,
+        context.bot.send_message(parse_mode='html', chat_id=game_id,
                                  text=f"{hourglass} {diff_players} player is missing! ")
     else:
-        context.bot.send_message(parse_mode='Markdown', chat_id=game_id,
+        context.bot.send_message(parse_mode='html', chat_id=game_id,
                                  text=f"{hourglass} {diff_players} players are missing!")
 
 
@@ -139,7 +141,7 @@ def next_player(update, context):
     if update.effective_chat.type == "private":
         msg = "Forever Alone? Or you want to play with yourself? No? \n" \
               "Just add me to a group and then create a game!"
-        context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
+        context.bot.send_message(parse_mode='html', chat_id=update.effective_chat.id, text=msg)
         return
 
     game_id = update.effective_chat.id
@@ -147,7 +149,7 @@ def next_player(update, context):
     if game_id not in games:
         msg = "Yeah.. Let's begin a game then create one..." \
               "Create a game Huuuman!"
-        context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
+        context.bot.send_message(parse_mode='html', chat_id=update.effective_chat.id, text=msg)
         return
 
     current_game = games[game_id]
@@ -157,7 +159,7 @@ def next_player(update, context):
 
     if len(current_game["users"]) < 1:
         msg = "Get some Friends...or try to join with /join?"
-        context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
+        context.bot.send_message(parse_mode='html', chat_id=update.effective_chat.id, text=msg)
         return
 
     game_loop(update, context, game_id)
@@ -183,12 +185,15 @@ def remove_chosen_cards(game_id):
 
 
 def send_score_to_players(update, context, game_id):
-    msg = "Scores \n"
+    msg = format_msg(f'''
+        <b>Scores:</b>
+
+        ''')
     current_game = games[game_id]
     for user_id in current_game["users"]:
         score = current_game["scores"][user_id]
         name = user_ids[user_id]["info"]["first_name"]
-        msg += f"{name} - Score {score} \n"
+        msg += f"{name} - Score <b>{score}</b> \n"
     send_message_to_players(update, context, game_id, msg)
 
 
@@ -199,7 +204,7 @@ def notify_card_czar(update, context, game_id):
     black_card_text = get_current_black_card(game_id)["text"]
     msg = format_msg(f'''
         {crown} You are the card czar.
-        <i>Please wait for other players!</i>
+        <i>Please wait {hourglass} for other players to choose!</i>
 
         <b>{black_card_text}</b>
     ''')
@@ -292,7 +297,7 @@ def send_message_to_players(update, context, game_id, msg):
     for user in current_game["users"]:
         try:
             chat_id = player_to_private_chat_id[user]
-            context.bot.send_message(parse_mode='Markdown', chat_id=chat_id, text=msg)
+            context.bot.send_message(parse_mode='html', chat_id=chat_id, text=msg)
         except:
             pass
 
@@ -314,13 +319,13 @@ def create_cards_choice_czar(game_id):
     return button_list
 
 
-def send_choice_to_czar(update, context, game_id):
+def send_choice_to_czar(update, context, game_id, title):
     current_game = games[game_id]
     czar_id = current_game["czar"]
     user_id = current_game["users"][czar_id]
 
     black_card_id = current_game["black_card"]
-    title = decks["blackCards"][black_card_id]["text"]
+    #title = decks["blackCards"][black_card_id]["text"]
 
     send_return_back_to_game[user_id].insert(0, game_id)
 
@@ -344,7 +349,17 @@ def send_cards_choice_to_user(update, context, game_id, user_id):
         msg += format_msg(f"""
         <i>Pick your Card</i>!
         """)
-    else:
+    elif pick == 2:
+        msg += format_msg(f"""
+        <i>Pick {twofingers} <b>{pick} Cards</b></i>!
+        """)
+
+    elif pick == 3:
+        msg += format_msg(f"""
+        <i>Pick {three} <b>{pick} Cards</b></i>!
+        """)
+
+    else :
         msg += format_msg(f"""
         <i>Pick <b>{pick} Cards</b></i>!
         """)
@@ -356,23 +371,6 @@ def send_cards_choice_to_user(update, context, game_id, user_id):
     send_return_back_to_game[user_id].insert(0, game_id)
 
     send_choice(update, context, player_to_private_chat_id[user_id], msg, button_list)
-
-    # context.bot.send_message(parse_mode='Markdown', chat_id=game_id, text=msg)
-
-
-''''
-    current_black = get_current_black_card(game_id)
-    pick = current_black["pick"]
-    cardtext = current_black["text"]
-    msg = format_msg(f"""
-        *{cardtext}*
-        """)
-    if pick == 1:
-        msg += format_msg(f"""\n*Pick your Card*!""")
-    else :
-        msg += format_msg(f"""\n*Pick {pick} Cards*!""")
-
-'''
 
 
 @send_action(ChatAction.TYPING)
@@ -422,7 +420,7 @@ def destroy(update, context):
             Destroying you...?
             What would be the point of that?
         ''')
-        context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
+        context.bot.send_message(parse_mode='html', chat_id=update.effective_chat.id, text=msg)
         return
     game_id = update.effective_chat.id
     if game_id in games:
@@ -430,12 +428,12 @@ def destroy(update, context):
         msg = format_msg(f'''
                     thx
         ''')
-        context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
+        context.bot.send_message(parse_mode='html', chat_id=update.effective_chat.id, text=msg)
     else:
         msg = format_msg(f'''
             Nothing happened!
         ''')
-        context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
+        context.bot.send_message(parse_mode='html', chat_id=update.effective_chat.id, text=msg)
 
 
 def status(update, context):
@@ -444,18 +442,18 @@ def status(update, context):
         msg = format_msg(f'''
                 Only in Groups!
         ''')
-        context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
+        context.bot.send_message(parse_mode='html', chat_id=update.effective_chat.id, text=msg)
         return
 
     if game_id not in games:
         msg = format_msg(f'''
                     There is no game!
                 ''')
-        context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
+        context.bot.send_message(parse_mode='html', chat_id=update.effective_chat.id, text=msg)
         return
 
     current_game = games[game_id]
-    msg = f"*Status* \n\n"
+    msg = f"<b>Status</b> \n\n"
 
     czar_rou = czar_round(game_id)
     if czar_rou:
@@ -477,7 +475,7 @@ def status(update, context):
             else:
                 msg += f"{name}, has chosen \n"
 
-    context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
+    context.bot.send_message(parse_mode='html', chat_id=update.effective_chat.id, text=msg)
 
 
 def load_api_token():
