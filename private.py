@@ -1,22 +1,13 @@
 import random
 
+from emojis import *
 from main import send_choice_to_czar, get_current_black_card, send_cards_choice_to_user, czar_round, \
     create_cards_choice_czar_dict, game_loop, send_message_to_players
 from stats import *
 from util import is_user_czar, format_msg
-from emoji import emojize
-
-point_right = emojize(":point_right:", use_aliases=True)
-grin = emojize(":grin:", use_aliases=True)
-wave = emojize(":wave:", use_aliases=True)
-drum = emojize(":drum:", use_aliases=True)
-glass = "\U0001f942"
-
 
 
 def start(update, context):
-
-
     if update.effective_chat.type == "private":
         msg = format_msg(f'''
                 Hello Human! I am the

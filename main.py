@@ -1,26 +1,15 @@
+import logging
 import os
 
-from emoji import emojize
 from telegram.ext import Updater, MessageHandler, Filters, CommandHandler
 
 from private import *
 from util import *
 
-eyes = emojize(":eyes:", use_aliases=True)
-point_right = emojize(":point_right:", use_aliases=True)
-point_left = emojize(":point_left:", use_aliases=True)
-grin = emojize(":grin:", use_aliases=True)
-wave = emojize(":wave:", use_aliases=True)
-drum = emojize(":drum:", use_aliases=True)
-violin = emojize(":violin:", use_aliases=True)
-handshake = emojize(":handshake:", use_aliases=True)
-location = emojize(":location:", use_aliases=True)
-hourglass = emojize(":hourglass:", use_aliases=True)
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
-
-crescmoon = "\U0001f318"
-dice = "\U0001f3b2"
-glass = "\U0001f942"
 
 def choose_random_black_card(game_id):
     current_game = games[game_id]
@@ -95,8 +84,6 @@ def join(update, context):
     current_game["scores"][user_id] = 0
     current_game["card_choice"][user_id] = []
 
-    grin = emojize(":grin:", use_aliases=True)
-
     msg = f"Human {update.effective_user.first_name} joined the game!! Yeaaaah {grin}!!"
     context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
 
@@ -108,13 +95,7 @@ def join(update, context):
                                      text=msg_gamestart)
             next_player(update, context)
         else:
-
-            if diff_players == 1:
-                context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id,
-                                         text=f"{hourglass} {diff_players} player is missing! ")
-            else:
-                context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id,
-                                     text=f"{hourglass} {diff_players} players are missing!")
+            send_waiting_for_players(update, context, game_id, diff_players)
     else:
         """
         use
@@ -131,6 +112,15 @@ def join(update, context):
         # private message
         context.bot.send_message(parse_mode='Markdown', chat_id=player_to_private_chat_id[user_id],
                                  text=f"Game started, please wait until next round")
+
+
+def send_waiting_for_players(update, context, game_id, diff_players):
+    if diff_players == 1:
+        context.bot.send_message(parse_mode='Markdown', chat_id=game_id,
+                                 text=f"{hourglass} {diff_players} player is missing! ")
+    else:
+        context.bot.send_message(parse_mode='Markdown', chat_id=game_id,
+                                 text=f"{hourglass} {diff_players} players are missing!")
 
 
 def fill_white_cards(game_id):
@@ -221,6 +211,11 @@ def reset_game(game_id):
 
 def game_loop(update, context, game_id):
     current_game = games[game_id]
+
+    diff_players = current_game["min_players"] - len(current_game["users"])
+    if diff_players > 0:
+        send_waiting_for_players(update, context, game_id, diff_players)
+        return
 
     remove_chosen_cards(game_id)
     it_czar(game_id)
@@ -355,25 +350,36 @@ def leave(update, context):
         context.bot.send_message(chat_id=game_id, text=msg)
 
     user_id = update.effective_user.id
-    try:
+    # try:
+    if game_id in games:
         current_game = games[game_id]
 
-        current_game["users"].remove(user_id)
-        current_game["cards"].pop(user_id, None)
-        current_game["scores"].pop(user_id, None)
-        current_game["card_choice"].pop(user_id, None)
+        if user_id in current_game["users"]:
+            current_game["users"].remove(user_id)
+            current_game["cards"].pop(user_id, None)
+            current_game["scores"].pop(user_id, None)
+            current_game["card_choice"].pop(user_id, None)
 
-        chat_id = player_to_private_chat_id[user_id]
-        msg = "You left the game!"
-        context.bot.send_message(chat_id=chat_id, text=msg)
+            chat_id = player_to_private_chat_id[user_id]
+            msg = "You left the game!"
+            context.bot.send_message(chat_id=chat_id, text=msg)
 
-        # reset game if someone leafs the game
-        for user in current_game["card_choice"]:
-            current_game["card_choice"][user] = []
-        game_loop(update, context, game_id)
-    except:
-        msg = "Something went wrong, but I am sure you left the game.."
+            # reset game if someone leafs the game
+            for user in current_game["card_choice"]:
+                current_game["card_choice"][user] = []
+
+            game_loop(update, context, game_id)
+        else:
+            msg = "You are not part of the game!"
+            context.bot.send_message(chat_id=game_id, text=msg)
+    else:
+        msg = "There is no game you can leave!"
         context.bot.send_message(chat_id=game_id, text=msg)
+
+
+# except:
+#    msg = "Something went wrong, but I am sure you left the game.."
+#    context.bot.send_message(chat_id=game_id, text=msg)
 
 
 def destroy(update, context):
