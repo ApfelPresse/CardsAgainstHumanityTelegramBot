@@ -14,15 +14,17 @@ logger.setLevel(logging.INFO)
 
 
 def choose_random_black_card(game_id):
-    current_game = games[game_id]
-
-    try:
-        deck = random.choice(current_game["game_stats"]["deck_keys"].split(","))
-    except:
-        deck = random.choice(game_stats_default["deck_keys"].split(","))
-
+    deck = get_random_deck(game_id)
     card = random.choice(decks[deck]["black"])
     return card
+
+
+def get_random_deck(game_id):
+    current_game = games[game_id]
+    try:
+        return random.choice(current_game["game_stats"]["deck_keys"].split(","))
+    except:
+        return random.choice(game_stats_default["deck_keys"].split(","))
 
 
 def create_game(update, context, game_id):
@@ -38,7 +40,6 @@ def create_game(update, context, game_id):
         games[game_id] = {
             "users": [],
             "czar": 0,
-            "min_players": 2,
             "game_started": False,
             "game_stats": game_stats_default.copy(),
             "cards": {},
@@ -49,6 +50,7 @@ def create_game(update, context, game_id):
         context.bot.send_message(parse_mode='html', chat_id=game_id, text=msg)
 
 
+@send_action(ChatAction.TYPING)
 def join(update, context):
     msg_gamestart = format_msg(f'''Enough humans. The game is starting. {point_left}
     Hurry on <b>back to the private chat</b> to pick your cards and play {violin} {dice}.''')
@@ -72,7 +74,7 @@ def join(update, context):
     game_id = update.effective_chat.id
     create_game(update, context, game_id)
 
-    current_game = games[update.effective_chat.id]
+    current_game = games[game_id]
 
     if user_id in current_game["users"]:
         msg = format_msg(f'''
@@ -89,7 +91,7 @@ def join(update, context):
     msg = f"Human {update.effective_user.first_name} joined the game!! Yeaaaah {grin}!!"
     context.bot.send_message(parse_mode='html', chat_id=update.effective_chat.id, text=msg)
 
-    diff_players = current_game["min_players"] - len(current_game["users"])
+    diff_players = how_many_players_missing(game_id)
     if not current_game["game_started"]:
         if diff_players <= 0:
             current_game["game_started"] = True
@@ -127,13 +129,14 @@ def send_waiting_for_players(update, context, game_id, diff_players):
 
 def fill_white_cards(game_id):
     current_game = games[game_id]
-    max_cards = 10
-    deck = "Base"
+    max_cards = current_game["game_stats"]["max_cards"]
+    deck = get_random_deck(game_id)
     for user in current_game["users"]:
         cards = random.sample(decks[deck]["white"], max_cards - len(current_game["cards"][user]))
         current_game["cards"][user] += cards
 
 
+@send_action(ChatAction.TYPING)
 def next_player(update, context):
     if update.effective_chat.type == "private":
         msg = "Forever Alone? Or you want to play with yourself? No? \n" \
@@ -217,10 +220,15 @@ def reset_game(game_id):
         current_game["cards"][user_id] = []
 
 
+def how_many_players_missing(game_id):
+    current_game = games[game_id]
+    return current_game["game_stats"]["min_players"] - len(current_game["users"])
+
+
 def game_loop(update, context, game_id):
     current_game = games[game_id]
 
-    diff_players = current_game["min_players"] - len(current_game["users"])
+    diff_players = how_many_players_missing(game_id)
     if diff_players > 0:
         send_waiting_for_players(update, context, game_id, diff_players)
         return
@@ -366,7 +374,7 @@ def send_cards_choice_to_user(update, context, game_id, user_id):
     send_choice(update, context, player_to_private_chat_id[user_id], msg, button_list)
 
 
-
+@send_action(ChatAction.TYPING)
 def leave(update, context):
     game_id = update.effective_chat.id
     if update.effective_chat.type == "private":
