@@ -93,7 +93,7 @@ def callback(update, context):
                 for c in choices:
                     msg += c + "\n"
 
-                send_message_to_players(update, context, game_id, msg)
+                send_message_to_players(update, context, game_id, msg, czar=False)
                 send_choice_to_czar(update, context, game_id, msg)
             else:
                 how_many_cards_to_choose = get_current_black_card(game_id)["pick"]
