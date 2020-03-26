@@ -85,7 +85,7 @@ def callback(update, context):
 
                 msg = format_msg(f"""
                     All players have chosen their cards!
-                    
+
                     <i>The Czar may now choose:</i>
                     """)
                 choices = list(czar_possible_choices.values())
@@ -117,7 +117,7 @@ def handle_czar_choice(choice, context, game_id, update):
 
                         {point_right} {choice}
 
-                        Player <b>{player_name_score}</b> gets a point!
+                        Human <b>{player_name_score}</b> gets a point!
                 ''')
     send_message_to_players(update, context, game_id, msg)
     game_loop(update, context, game_id)
