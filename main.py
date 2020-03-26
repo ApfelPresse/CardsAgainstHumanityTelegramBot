@@ -3,10 +3,9 @@ import os
 
 from telegram.ext import Updater, MessageHandler, Filters, CommandHandler
 
+from emojis import *
 from private import *
 from util import *
-from emojis import *
-
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger()
@@ -38,7 +37,6 @@ def create_game(update, context, game_id):
         games[game_id] = {
             "users": [],
             "czar": 0,
-            "min_players": 2,
             "game_started": False,
             "game_stats": game_stats_default.copy(),
             "cards": {},
@@ -72,7 +70,7 @@ def join(update, context):
     game_id = update.effective_chat.id
     create_game(update, context, game_id)
 
-    current_game = games[update.effective_chat.id]
+    current_game = games[game_id]
 
     if user_id in current_game["users"]:
         msg = format_msg(f'''
@@ -89,7 +87,7 @@ def join(update, context):
     msg = f"Human {update.effective_user.first_name} joined the game!! Yeaaaah {grin}!!"
     context.bot.send_message(parse_mode='Markdown', chat_id=update.effective_chat.id, text=msg)
 
-    diff_players = current_game["min_players"] - len(current_game["users"])
+    diff_players = how_many_players_missing(game_id)
     if not current_game["game_started"]:
         if diff_players <= 0:
             current_game["game_started"] = True
@@ -213,10 +211,15 @@ def reset_game(game_id):
         current_game["cards"][user_id] = []
 
 
+def how_many_players_missing(game_id):
+    current_game = games[game_id]
+    return current_game["game_stats"]["min_players"] - len(current_game["users"])
+
+
 def game_loop(update, context, game_id):
     current_game = games[game_id]
 
-    diff_players = current_game["min_players"] - len(current_game["users"])
+    diff_players = how_many_players_missing(game_id)
     if diff_players > 0:
         send_waiting_for_players(update, context, game_id, diff_players)
         return
@@ -338,7 +341,7 @@ def send_cards_choice_to_user(update, context, game_id, user_id):
         msg += format_msg(f"""
         <i>Pick your Card</i>!
         """)
-    else :
+    else:
         msg += format_msg(f"""
         <i>Pick <b>{pick} Cards</b></i>!
         """)
@@ -351,8 +354,7 @@ def send_cards_choice_to_user(update, context, game_id, user_id):
 
     send_choice(update, context, player_to_private_chat_id[user_id], msg, button_list)
 
-
-    #context.bot.send_message(parse_mode='Markdown', chat_id=game_id, text=msg)
+    # context.bot.send_message(parse_mode='Markdown', chat_id=game_id, text=msg)
 
 
 ''''
@@ -368,8 +370,6 @@ def send_cards_choice_to_user(update, context, game_id, user_id):
         msg += format_msg(f"""\n*Pick {pick} Cards*!""")
 
 '''
-
-
 
 
 def leave(update, context):
