@@ -18,9 +18,7 @@ Cards Against Humanity (Clone) Telegram Bot v0.5
 
 1.  Open the private chat of your newly created telegram bot and write * /start * (every player has to do this)
 2.  Add the bot to a telegram group
-3.  Write /create in the group, to create a game
-4.  Then /join the game (every player has to do this)
-5.  /begin the game, interactions take place in the private chat
+3.  Then /join the game
 
 # *wip Docker
 
