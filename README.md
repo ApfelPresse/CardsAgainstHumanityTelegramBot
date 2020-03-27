@@ -19,7 +19,7 @@ Cards Against Humanity (Clone) Telegram Bot v0.8
     
     docker run -d --env API_TOKEN=<API-TOKEN> apfelpresse/cah_telegram:latest
     
-## (Opt2) Docker-Compose
+## (Opt3) Docker-Compose
     
     version: '3'
 
