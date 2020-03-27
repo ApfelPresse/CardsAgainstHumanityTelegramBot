@@ -16,7 +16,7 @@ def choose_random_black_card(game_id):
     deck = get_random_deck(game_id)
     card = random.choice(decks[deck]["black"])
     return card
-
+ 
 
 def get_random_deck(game_id):
     current_game = games[game_id]
