@@ -15,7 +15,7 @@ user_ids = {}
 player_to_private_chat_id = {}
 game_stats_default = {
     "max_score": 8,
-    "min_players": 2,
+    "min_players": 3,
     "max_cards": 10,
     "deck_keys": "Base,CAHe1,CAHe2,CAHe3,CAHe4,CAHe5,CAHe6"
 }
